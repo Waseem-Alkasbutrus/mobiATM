@@ -1,8 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
-#define MAX_OPT_LENGTH 250 // Max size of menu option including null terminator
+#define MAX_LENGTH 1000 // Max number of characters scanned at once
 
 typedef struct menu Menu;
 struct menu
@@ -26,7 +27,7 @@ Menu *create_menu(char *prompt, char **opts, int opt_count)
     new_menu->opt_count = opt_count;
 
     // Allocate memory for and set all the provided prompts
-    new_menu->opts = calloc(opt_count, sizeof(char*));
+    new_menu->opts = calloc(opt_count, sizeof(char *));
     for (int i = 0; i < opt_count; i++)
     {
         new_menu->opts[i] = malloc(sizeof(char) * (strlen(opts[i]) + 1));
@@ -44,21 +45,81 @@ void free_menu(Menu *menu)
     {
         free(menu->opts[i]);
     }
-    free (menu->opts);
+    free(menu->opts);
 
     free(menu->prompt);
 
     free(menu);
 }
 
-int print_menu(Menu menu) {
+void print_menu(const Menu menu)
+{
     printf("%s\n", menu.prompt);
-    
-    for (int i = 0; i < menu.opt_count; i++) {
-        printf("%3i. %s\n", i, menu.opts[i]);
+
+    for (int i = 0; i < menu.opt_count; i++)
+    {
+        printf("%3i. %s\n", i + 1, menu.opts[i]);
     }
 
     printf(">> ");
+}
+
+// Checks if a given string is a number
+int is_number(char *str)
+{
+    int result = 1; // 0 for false, 1 for true
+
+    for (int i = 0; i < strlen(str); i++)
+    {
+        if (!isdigit(str[i]))
+        {
+            result = 0;
+            break;
+        }
+
+        i++;
+    }
+
+    return result;
+}
+
+// Presents the menu to the user to pick an option. The picked option is returned.
+// This will repeat until the user provides a valid option > 0 and <= menu.opt_count
+int ask_user(const Menu menu)
+{
+    int picked_opt = 0;
+    char buffer[MAX_LENGTH] = {};
+
+    while (1)
+    {
+        print_menu(menu);
+
+        fgets(buffer, MAX_LENGTH, stdin);
+
+        printf(" buffer = %s", buffer);
+        if (is_number(buffer))
+        {
+            int temp = atoi(buffer);
+
+            printf("temp = [%d]\n", temp);
+
+            if (temp <= menu.opt_count && temp > 0)
+            {
+                picked_opt = temp;
+                break;
+            }
+            else
+            {
+                printf("\nOut of range. Please try again.\n\n");
+            }
+        }
+        else
+        {
+            printf("\nNot a number. Please try again.\n\n");
+        }
+    }
+
+    return picked_opt;
 }
 
 int main(void)
@@ -66,7 +127,8 @@ int main(void)
     char *main_menu_opts[2] = {"First opt", "Second opt"};
     Menu *main_menu = create_menu("Please select an option below:", main_menu_opts, 2);
 
-    print_menu(*main_menu);
+    int picked = ask_user(*main_menu);
+    printf("You picked (%d) %s\n", picked, main_menu_opts[picked - 1]);
 
     free_menu(main_menu);
 
