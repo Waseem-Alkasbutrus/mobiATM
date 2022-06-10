@@ -96,12 +96,9 @@ int ask_user(const Menu menu)
 
         fgets(buffer, MAX_LENGTH, stdin);
 
-        printf(" buffer = %s", buffer);
         if (is_number(buffer))
         {
             int temp = atoi(buffer);
-
-            printf("temp = [%d]\n", temp);
 
             if (temp <= menu.opt_count && temp > 0)
             {
@@ -124,11 +121,27 @@ int ask_user(const Menu menu)
 
 int main(void)
 {
-    char *main_menu_opts[2] = {"First opt", "Second opt"};
-    Menu *main_menu = create_menu("Please select an option below:", main_menu_opts, 2);
+    char *main_menu_opts[5] = {"Withdraw Money", "Deposit Money", "Check Balance", "Transfer Money", "Exit"};
+    Menu *main_menu = create_menu("Please select an option below:", main_menu_opts, 5);
 
-    int picked = ask_user(*main_menu);
-    printf("You picked (%d) %s\n", picked, main_menu_opts[picked - 1]);
+    int selection = ask_user(*main_menu);
+
+    switch (selection)
+    {
+    case 1: // Withdraw Money
+        break;
+    case 2: // Deposit Money
+        break;
+    case 3: // Check Balance
+        break;
+    case 4: // Transfer Money
+        break;
+    case 5: // Exit
+        break;
+    default: // Error
+        printf("Invalid input. Exiting...");
+        return EXIT_FAILURE;
+    }
 
     free_menu(main_menu);
 
